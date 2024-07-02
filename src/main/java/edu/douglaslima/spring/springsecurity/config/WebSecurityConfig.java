@@ -23,9 +23,10 @@ public class WebSecurityConfig {
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 		http
 			.authorizeHttpRequests(authManager -> authManager
-				.requestMatchers("/").permitAll()
-				.requestMatchers("/user").hasAnyRole("USER", "ADMIN")
-				.requestMatchers("/admin").hasRole("ADMIN")
+				.requestMatchers("/rest-api/sobre").permitAll()
+				.requestMatchers("/rest-api/welcome").permitAll()
+				.requestMatchers("/rest-api/user").authenticated()
+				.requestMatchers("/rest-api/admin").hasRole("ADMIN")
 				.anyRequest().authenticated()
 			)
 			.formLogin(Customizer.withDefaults())
