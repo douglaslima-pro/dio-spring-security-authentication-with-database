@@ -4,12 +4,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
@@ -17,7 +15,15 @@ import org.springframework.security.web.SecurityFilterChain;
 public class WebSecurityConfig {
 	
 	@Autowired
+	private SecurityDatabaseService securityService;
+	
+	@Autowired
 	private BCryptPasswordEncoder encoder;
+	
+	@Autowired
+	public void globalUserDetails(AuthenticationManagerBuilder authManager) throws Exception {
+		authManager.userDetailsService(this.securityService).passwordEncoder(this.encoder);
+	}
 	
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -32,24 +38,6 @@ public class WebSecurityConfig {
 			.formLogin(Customizer.withDefaults())
 			.httpBasic(Customizer.withDefaults());
 		return http.build();
-	}
-
-	@Bean
-	public InMemoryUserDetailsManager userDetailsService() {
-		UserDetails user = User.builder()
-				.username("user")
-				.password(this.encoder.encode("123456"))
-				.roles("USER")
-				.build();
-		UserDetails admin = User.builder()
-				.username("admin")
-				.password(this.encoder.encode("123456"))
-				.roles("USER", "ADMIN")
-				.build();
-		InMemoryUserDetailsManager inMemoryUsersManager = new InMemoryUserDetailsManager();
-		inMemoryUsersManager.createUser(user);
-		inMemoryUsersManager.createUser(admin);
-		return inMemoryUsersManager;
 	}
 	
 }
